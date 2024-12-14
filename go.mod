@@ -1,6 +1,6 @@
 module github.com/gusevgrishaem1/psp
 
-go 1.23.1
+go 1.21.1
 
 require github.com/stretchr/testify v1.10.0
 

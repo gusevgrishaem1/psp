@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -94,6 +95,96 @@ func ParallelMap[T, R any](ctx context.Context, data []T, batchSize int, maxWork
 
 	if err := g.Wait(); err != nil {
 		return nil, err
+	}
+
+	return result, nil
+}
+
+// ParallelFilter filters the data in parallel by applying a filtering function
+// to each batch of data and retaining only the elements that satisfy the filter condition.
+//
+// The filterFunc must return a boolean indicating whether the element should be kept.
+//
+// Example usage:
+// ```go
+//
+//	filterFunc := func(ctx context.Context, batch []int) ([]int, error) {
+//	    var result []int
+//	    for _, v := range batch {
+//	        if v%2 == 0 {
+//	            result = append(result, v)
+//	        }
+//	    }
+//	    return result, nil
+//	}
+//
+// ```
+func ParallelFilter[T any](ctx context.Context, data []T, batchSize int, maxWorkers uint, filterFunc func(ctx context.Context, batch []T) ([]T, error)) ([]T, error) {
+	if batchSize <= 0 {
+		return nil, errors.New("batchSize must be greater than 0")
+	}
+
+	if maxWorkers <= 0 {
+		return nil, errors.New("maxWorkers must be greater than 0")
+	}
+
+	if len(data) == 0 {
+		return []T{}, nil
+	}
+
+	// Mutex for thread-safe operations on the result slice.
+	var mu sync.Mutex
+	// Semaphore to limit the number of concurrent workers.
+	sem := make(chan struct{}, maxWorkers)
+	defer close(sem)
+
+	// Using a sync.WaitGroup or errgroup to handle goroutines and errors.
+	g, _ := errgroup.WithContext(ctx)
+
+	// Map to store filtered data by batch number.
+	mp := make(map[int][]T, len(data)/batchSize+1)
+
+	// Loop over the data in batches.
+	for i := 0; i < len(data); i += batchSize {
+		start := i
+		end := i + batchSize
+		if end > len(data) {
+			end = len(data)
+		}
+
+		// Acquire a semaphore slot before starting the goroutine.
+		sem <- struct{}{}
+
+		// Launch a goroutine to process each batch.
+		g.Go(func() error {
+			defer func() { <-sem }() // Release the semaphore slot when the goroutine finishes
+
+			// Apply the filter function to the current batch.
+			filteredBatch, err := filterFunc(ctx, data[start:end])
+			if err != nil {
+				return err
+			}
+
+			// Lock the map and store the filtered batch.
+			mu.Lock()
+			mp[start] = filteredBatch
+			mu.Unlock()
+
+			return nil
+		})
+	}
+
+	// Wait for all goroutines to finish.
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	// Create a result slice and concatenate filtered batches in order.
+	result := make([]T, 0, len(data))
+	for i := 0; i < len(data); i += batchSize {
+		if filteredBatch, exists := mp[i]; exists {
+			result = append(result, filteredBatch...)
+		}
 	}
 
 	return result, nil
