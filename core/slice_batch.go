@@ -7,27 +7,28 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// ParallelMap выполняет параллельную обработку среза данных с использованием
-// пакетов (batching) и ограничением на количество одновременно работающих горутин.
-// Функция применяет mapFunc к каждому пакету данных и возвращает итоговый срез
-// с результатами всех обработанных пакетов.
+// ParallelMap performs parallel processing on a slice of data using
+// batching and limits the number of concurrently running goroutines.
+// The function applies the mapFunc to each data batch and returns the final slice
+// with the results of all processed batches.
 //
-// Контекст (context.Context) используется для управления временем выполнения
-// и отмены операций, особенно при длительных или параллельных задачах.
+// The context (context.Context) is used to manage the execution time
+// and cancellation of operations, especially when dealing with long-running
+// or parallel tasks.
 //
-// Параметры:
-//   - ctx: контекст, используемый для управления отменой и дедлайнами.
-//   - data: срез входных данных, который будет обрабатываться.
-//   - batchSize: размер каждого пакета данных для обработки.
-//   - maxw: максимальное количество горутин, которые могут работать одновременно.
-//   - mapFunc: функция, которая обрабатывает каждый пакет данных. Она принимает
-//     контекст и пакет данных и возвращает срез результатов и ошибку.
+// Parameters:
+//   - ctx: the context used to manage cancellation and deadlines.
+//   - data: the slice of input data to be processed.
+//   - batchSize: the size of each data batch for processing.
+//   - maxWorkers: the maximum number of goroutines that can run concurrently.
+//   - mapFunc: the function that processes each data batch. It takes
+//     the context and a data batch as input and returns a slice of results and an error.
 //
-// Возвращает:
-// - Результирующий срез с обработанными элементами.
-// - Ошибку, если обработка не удалась на любом этапе или если контекст был отменен.
+// Returns:
+// - The resulting slice with processed elements.
+// - An error if the processing failed at any stage or if the context was canceled.
 //
-// Пример использования:
+// Example usage:
 // ```go
 // ctx := context.Background()
 // data := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
