@@ -16,6 +16,7 @@ func ParallelMap[T, R any](
     maxw uint,
     mapFunc func(ctx context.Context, batch []T) ([]R, error),
 ) ([]R, error)
+```
 
 ## ParallelFilter Function
 
