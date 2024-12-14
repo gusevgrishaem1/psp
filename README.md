@@ -43,7 +43,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"github.com/yourusername/psp" // Replace with your actual package import path
+	"github.com/gusevgrishaem1/psp/core"
 )
 
 func main() {
