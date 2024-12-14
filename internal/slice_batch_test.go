@@ -1,4 +1,4 @@
-package test
+package core
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gusevgrishaem1/psp/core"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,7 +31,7 @@ func TestParallelMap_Success(t *testing.T) {
 	expected := []string{"1", "2", "3", "4", "5"}
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
 
 	// Assertions
 	assert.NoError(t, err)
@@ -48,7 +47,7 @@ func TestParallelMap_EmptyData(t *testing.T) {
 	maxw := uint(2) // Max 2 workers concurrently
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
 
 	// Assertions
 	assert.NoError(t, err)
@@ -67,7 +66,7 @@ func TestParallelMap_SingleBatch(t *testing.T) {
 	expected := []string{"1", "2", "3"}
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
 
 	// Assertions
 	assert.NoError(t, err)
@@ -88,7 +87,7 @@ func TestParallelMap_Errors(t *testing.T) {
 	maxw := uint(2)
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockErrMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockErrMapFunc)
 
 	// Assertions
 	assert.Error(t, err)
@@ -116,7 +115,7 @@ func TestParallelMap_Concurrency(t *testing.T) {
 	}
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockSlowMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockSlowMapFunc)
 
 	// Assertions
 	assert.NoError(t, err)
@@ -132,7 +131,7 @@ func TestParallelMap_InvalidBatchSize(t *testing.T) {
 	maxw := uint(2)
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
 
 	// Assertions
 	assert.Error(t, err)
@@ -149,7 +148,7 @@ func TestParallelMap_InvalidMaxWorkers(t *testing.T) {
 	maxw := uint(0)
 
 	// Execute ParallelMap
-	result, err := core.ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
+	result, err := ParallelMap(ctx, data, batchSize, maxw, mockMapFunc)
 
 	// Assertions
 	assert.Error(t, err)
