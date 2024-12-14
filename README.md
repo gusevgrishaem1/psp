@@ -32,3 +32,44 @@ func ParallelFilter[T any](
     maxw uint,
     filterFunc func(ctx context.Context, batch []T) ([]T, error),
 ) ([]T, error)
+```
+
+### Example Usage
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"github.com/yourusername/psp" // Replace with your actual package import path
+)
+
+func main() {
+	ctx := context.Background()
+	data := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	batchSize := 3
+	maxWorkers := uint(3)
+
+	// Define a filtering function that selects even numbers
+	filterFunc := func(ctx context.Context, batch []int) ([]int, error) {
+		var result []int
+		for _, num := range batch {
+			if num%2 == 0 {
+				result = append(result, num)
+			}
+		}
+		return result, nil
+	}
+
+	// Call ParallelFilter to filter the data in parallel
+	result, err := psp.ParallelFilter(ctx, data, batchSize, maxWorkers, filterFunc)
+	if err != nil {
+		log.Fatalf("Error filtering data: %v", err)
+	}
+
+	// Print the results
+	fmt.Println("Filtered results:", result)
+}
+```
