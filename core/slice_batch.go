@@ -132,19 +132,14 @@ func ParallelFilter[T any](ctx context.Context, data []T, batchSize int, maxWork
 		return []T{}, nil
 	}
 
-	// Mutex for thread-safe operations on the result slice.
-	var mu sync.Mutex
-	// Semaphore to limit the number of concurrent workers.
+	mu := new(sync.Mutex)
 	sem := make(chan struct{}, maxWorkers)
 	defer close(sem)
 
-	// Using a sync.WaitGroup or errgroup to handle goroutines and errors.
 	g, _ := errgroup.WithContext(ctx)
 
-	// Map to store filtered data by batch number.
 	mp := make(map[int][]T, len(data)/batchSize+1)
 
-	// Loop over the data in batches.
 	for i := 0; i < len(data); i += batchSize {
 		start := i
 		end := i + batchSize
@@ -152,20 +147,16 @@ func ParallelFilter[T any](ctx context.Context, data []T, batchSize int, maxWork
 			end = len(data)
 		}
 
-		// Acquire a semaphore slot before starting the goroutine.
 		sem <- struct{}{}
 
-		// Launch a goroutine to process each batch.
 		g.Go(func() error {
-			defer func() { <-sem }() // Release the semaphore slot when the goroutine finishes
+			defer func() { <-sem }()
 
-			// Apply the filter function to the current batch.
 			filteredBatch, err := filterFunc(ctx, data[start:end])
 			if err != nil {
 				return err
 			}
 
-			// Lock the map and store the filtered batch.
 			mu.Lock()
 			mp[start] = filteredBatch
 			mu.Unlock()
@@ -174,12 +165,10 @@ func ParallelFilter[T any](ctx context.Context, data []T, batchSize int, maxWork
 		})
 	}
 
-	// Wait for all goroutines to finish.
 	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 
-	// Create a result slice and concatenate filtered batches in order.
 	result := make([]T, 0, len(data))
 	for i := 0; i < len(data); i += batchSize {
 		if filteredBatch, exists := mp[i]; exists {
