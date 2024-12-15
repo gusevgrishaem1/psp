@@ -13,7 +13,7 @@ func ParallelMap[T, R any](
     ctx context.Context,
     data []T,
     batchSize int,
-    maxw uint,
+    maxWorkers uint,
     mapFunc func(ctx context.Context, batch []T) ([]R, error),
 ) ([]R, error)
 ```
@@ -29,7 +29,7 @@ func ParallelFilter[T any](
     ctx context.Context,
     data []T,
     batchSize int,
-    maxw uint,
+    maxWorkers uint,
     filterFunc func(ctx context.Context, batch []T) ([]T, error),
 ) ([]T, error)
 ```
