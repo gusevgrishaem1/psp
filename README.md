@@ -4,7 +4,7 @@ The **PSP** (Parallel Slice Processing) library provides a set of utilities for 
 
 ## ParallelMap Function
 
-The `ParallelMap` function allows you to apply a transformation function (mapping function) concurrently over a slice of data in batches. This function splits the data into smaller chunks, processes them in parallel, and then combines the results. By controlling the number of workers (`maxw`) and the batch size (`batchSize`), you can fine-tune the function to suit your performance and resource requirements.
+The `ParallelMap` function allows you to apply a transformation function (mapping function) concurrently over a slice of data in batches. This function splits the data into smaller chunks, processes them in parallel, and then combines the results. By controlling the number of workers (`maxWorkers`) and the batch size (`batchSize`), you can fine-tune the function to suit your performance and resource requirements.
 
 ### Function Signature
 
